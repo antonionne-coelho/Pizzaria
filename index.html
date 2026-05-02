@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizzaria UFRN | Projeto Web</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <nav>
+            <div class="logo">
+                <img src="https://png.pngtree.com/png-vector/20250426/ourmid/pngtree-cartoon-chef-holding-pizza-with-happy-expression-clipart-illustration-png-image_16108826.png" alt="Logo Pizzaiolo" class="logo-img">
+                <span>Tonny's Pizza</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#" onclick="showSection('home')">Home</a></li>
+                <li><a href="#" onclick="showSection('cardapio')">Cardápio</a></li>
+                <li><a href="#" onclick="showSection('clientes')">Clientes</a></li>
+                <li><a href="#" onclick="showSection('cadastro')">Cadastrar</a></li>
+                <li><a href="#" onclick="showSection('login')">Login</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="content">
+        <!-- Seção Home (Capa) -->
+        <section id="home" class="active-section">
+            <div class="hero-text">
+                <h1>A Melhor Pizza de Canguaretama</h1>
+                <p>Sabor autêntico e massa artesanal.</p>
+            </div>
+        </section>
+
+        <!-- Seção Cardápio -->
+        <section id="cardapio" style="display:none;">
+            <h2>Nosso Cardápio</h2>
+            <p>Em breve, as melhores opções aqui!</p>
+        </section>
+
+        <!-- Seção Clientes -->
+        <section id="clientes" style="display:none;">
+            <h2>Galeria de Clientes</h2>
+            <div class="galeria">
+                <p>Fotos da galera saboreando nossas pizzas.</p>
+            </div>
+        </section>
+
+        <!-- Seção Cadastro -->
+        <section id="cadastro" style="display:none;">
+            <h2>Cadastre-se</h2>
+            <form class="auth-form">
+                <input type="text" placeholder="Nome Completo" required>
+                <input type="email" placeholder="E-mail" required>
+                <input type="password" placeholder="Senha" required>
+                <button type="submit">Enviar Cadastro</button>
+            </form>
+        </section>
+
+        <!-- Seção Login -->
+        <section id="login" style="display:none;">
+            <h2>Login</h2>
+            <form class="auth-form">
+                <input type="email" placeholder="E-mail" required>
+                <input type="password" placeholder="Senha" required>
+                <button type="submit">Entrar</button>
+            </form>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
