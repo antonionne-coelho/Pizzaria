@@ -33,27 +33,57 @@
             </div>
         </section>
 
-        <!-- Seção Cardápio -->
         <section id="cardapio" style="display:none;">
             <h2>Nosso Cardápio</h2>
-            <p>Em breve, as melhores opções aqui!</p>
+
+        <!-- Categorias -->
+            <div class="menu-categorias">
+                <button onclick="carregarCategoria('pizzas')">Pizzas</button>
+                <button onclick="carregarCategoria('pasteis')">Pastéis</button>
+                <button onclick="carregarCategoria('petiscos')">Petiscos</button>
+                <button onclick="carregarCategoria('bebidas')">Bebidas</button>
+            </div>
+
+            <!-- Conteúdo dinâmico -->
+            <div id="conteudo-cardapio" class="cardapio-bg">
+                <!-- Conteúdo aparece aqui -->
+            </div>
         </section>
 
         <!-- Seção Clientes -->
         <section id="clientes" style="display:none;">
             <h2>Galeria de Clientes</h2>
+
             <div class="galeria">
-                <p>Fotos da galera saboreando nossas pizzas.</p>
+                <img src="img/clientes1.jpg" alt="Cliente 1">
+                <img src="img/clientes2.jpg" alt="Cliente 2">
+                <img src="img/clientes3.jpeg" alt="Cliente 3">
             </div>
         </section>
 
-        <!-- Seção Cadastro -->
         <section id="cadastro" style="display:none;">
             <h2>Cadastre-se</h2>
+
             <form class="auth-form">
-                <input type="text" placeholder="Nome Completo" required>
-                <input type="email" placeholder="E-mail" required>
-                <input type="password" placeholder="Senha" required>
+            <input type="text" 
+                placeholder="Nome Completo" 
+                required
+                minlength="3">
+
+            <input type="email" 
+                placeholder="E-mail" 
+                required>
+
+            <input type="password" 
+                placeholder="Senha"
+                required
+                minlength="6">
+
+            <input type="password" 
+                placeholder="Confirmar Senha"
+                required
+                minlength="6">
+
                 <button type="submit">Enviar Cadastro</button>
             </form>
         </section>
@@ -61,9 +91,17 @@
         <!-- Seção Login -->
         <section id="login" style="display:none;">
             <h2>Login</h2>
+
             <form class="auth-form">
-                <input type="email" placeholder="E-mail" required>
-                <input type="password" placeholder="Senha" required>
+                <input type="email" 
+                    placeholder="E-mail" 
+                    required>
+
+                <input type="password" 
+                    placeholder="Senha"
+                    required
+                    minlength="6">
+
                 <button type="submit">Entrar</button>
             </form>
         </section>
