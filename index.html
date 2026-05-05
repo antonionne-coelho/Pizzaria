@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pizzaria UFRN | Projeto Web</title>
+    <title> Tonny's Pizza </title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -20,6 +20,9 @@
                 <li><a href="#" onclick="showSection('clientes')">Clientes</a></li>
                 <li><a href="#" onclick="showSection('cadastro')">Cadastrar</a></li>
                 <li><a href="#" onclick="showSection('login')">Login</a></li>
+                <li id="menuUsuario" style="display:none;">
+                    <a href="#" onclick="logout()">Sair</a>
+                </li>
             </ul>
         </nav>
     </header>
@@ -63,50 +66,33 @@
 
         <section id="cadastro" style="display:none;">
             <h2>Cadastre-se</h2>
-
-            <form class="auth-form">
-            <input type="text" 
-                placeholder="Nome Completo" 
-                required
-                minlength="3">
-
-            <input type="email" 
-                placeholder="E-mail" 
-                required>
-
-            <input type="password" 
-                placeholder="Senha"
-                required
-                minlength="6">
-
-            <input type="password" 
-                placeholder="Confirmar Senha"
-                required
-                minlength="6">
-
+            <form class="auth-form" id="formCadastro">
+                <input type="text" id="cadNome" placeholder="Nome Completo" required minlength="3">
+                <input type="email" id="cadEmail" placeholder="E-mail" required>
+                <input type="password" id="cadSenha" placeholder="Senha" required minlength="6">
+                <input type="password" id="cadConfirmar" placeholder="Confirmar Senha" required minlength="6">
                 <button type="submit">Enviar Cadastro</button>
             </form>
+    
         </section>
 
         <!-- Seção Login -->
         <section id="login" style="display:none;">
             <h2>Login</h2>
 
-            <form class="auth-form">
-                <input type="email" 
-                    placeholder="E-mail" 
-                    required>
-
-                <input type="password" 
-                    placeholder="Senha"
-                    required
-                    minlength="6">
-
+            <form class="auth-form" id="formLogin">
+                <input type="email" id="loginEmail" placeholder="E-mail" required>
+                <input type="password" id="loginSenha" placeholder="Senha" required minlength="6">
                 <button type="submit">Entrar</button>
             </form>
         </section>
     </main>
 
     <script src="script.js"></script>
+    
+    <footer>
+        Praça Augusto Severo, Centro - (yy) x xxxx-xxxx
+    </footer>
+
 </body>
 </html>

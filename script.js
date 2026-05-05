@@ -28,6 +28,7 @@ function carregarCategoria(tipo) {
 
             ${criarPizza("Queijo","img/pizza-de-queijo.png","29,00", "31,00", "36,00")}
             ${criarPizza("Portuguesa","img/pizza-portuguesa.jpg","32,00", "38,00", "45,00")}
+            ${criarPizza("Camarão","img/pizza-de-camarao.png","45,00", "52,00", "60,00")}
         </div>
         `;
     }
@@ -41,6 +42,7 @@ function carregarCategoria(tipo) {
             ${criarPastel("Queijo","img/pastel-de-queijo.jpg","9,00")}
             ${criarPastel("Frango","img/pastel-de-frango.jpg","10,00")}
             ${criarPastel("Pizza","img/pastel-de-pizza.jpg","10,00")}
+            ${criarPastel("Camarão","img/pastel-de-camarao.jpg","14,00")}
         </div>
         `;
     }
@@ -62,9 +64,13 @@ function carregarCategoria(tipo) {
     <div class="cardapio-content">
         <h2>Bebidas</h2>
 
+        ${criarBebida("Suco de Limão","img/suco-de-limão.jpeg","7,00")}
+        ${criarBebida("Suco de Laranja","img/suco-de-laranja.jpg","7,00")}
+        ${criarBebida("Suco de Uva","img/suco-de-uva.jpg","7,00")}
         ${criarBebida("Suco de Cajá","img/suco-de-caja.jpeg","7,00")}
-        ${criarBebida("Coca 1L","img/coca-cola.png","8,00")}
-        ${criarBebida("Heineken Long Neck","img/heineken.jpg","10,00")}
+        ${criarBebida("Coca 1L","img/coca-cola.png","10,00")}
+        ${criarBebida("Devassa","img/devassa.jpg","6,00")}
+        ${criarBebida("Heineken Long Neck","img/heineken.jpg","12,00")}
 
     </div>
     `;
@@ -145,3 +151,80 @@ formCadastro.addEventListener('submit', function(e) {
         alert("Cadastro enviado com sucesso!");
     }
 });
+
+// ===== CADASTRO =====
+document.getElementById("formCadastro").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const nome = document.getElementById("cadNome").value;
+    const email = document.getElementById("cadEmail").value;
+    const senha = document.getElementById("cadSenha").value;
+    const confirmar = document.getElementById("cadConfirmar").value;
+
+    if (senha !== confirmar) {
+        alert("As senhas não coincidem!");
+        return;
+    }
+
+    const usuario = {
+        nome: nome,
+        email: email,
+        senha: senha
+    };
+
+    localStorage.setItem("usuario", JSON.stringify(usuario));
+
+    alert("Cadastro realizado com sucesso!");
+    this.reset();
+});
+
+
+// ===== LOGIN =====
+document.getElementById("formLogin").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const email = document.getElementById("loginEmail").value;
+    const senha = document.getElementById("loginSenha").value;
+
+    const usuarioSalvo = JSON.parse(localStorage.getItem("usuario"));
+
+    if (!usuarioSalvo) {
+        alert("Nenhum usuário cadastrado!");
+        return;
+    }
+
+    if (email === usuarioSalvo.email && senha === usuarioSalvo.senha) {
+        localStorage.setItem("logado", "true");
+        alert("Login realizado!");
+        atualizarMenu();
+        this.reset()
+    } else {
+        alert("Email ou senha incorretos!");
+    }
+});
+
+
+// ===== ATUALIZA MENU =====
+function atualizarMenu() {
+    const logado = localStorage.getItem("logado");
+
+    if (logado === "true") {
+        document.getElementById("menuUsuario").style.display = "block";
+    } else {
+        document.getElementById("menuUsuario").style.display = "none";
+    }
+}
+
+
+// ===== LOGOUT =====
+function logout() {
+    localStorage.removeItem("logado");
+    alert("Você saiu!");
+    atualizarMenu();
+}
+
+
+// ===== AO CARREGAR A PÁGINA =====
+window.onload = function() {
+    atualizarMenu();
+};
