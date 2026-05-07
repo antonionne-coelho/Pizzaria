@@ -5,7 +5,7 @@ function showSection(sectionId) {
         sec.style.display = 'none';
     });
 
-    // Mostra apenas a seção clicada
+    // Mostrando apenas a seção clicada
     const target = document.getElementById(sectionId);
     if (target) {
         // Se for home, usamos flex para centralizar o texto da capa
@@ -15,6 +15,17 @@ function showSection(sectionId) {
 
 function carregarCategoria(tipo) {
     const container = document.getElementById("conteudo-cardapio");
+
+    // Configurando o fundo de acordo com a categoria
+    if (tipo === "pizzas") {
+        container.style.backgroundImage = "url('img/pizzas-fundo.jpg')";
+    } else if (tipo === "pasteis") {
+        container.style.backgroundImage = "url('img/pasteis-fundo.jpeg')";
+    } else if (tipo === "petiscos") {
+        container.style.backgroundImage = "url('img/petisco-fundo.jpg')";
+    } else if (tipo === "bebidas") {
+        container.style.backgroundImage = "url('img/bebidas-fundo.jpg')";
+    }
 
     let html = "";
 
