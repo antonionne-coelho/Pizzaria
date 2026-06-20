@@ -164,7 +164,7 @@ formCadastro.addEventListener('submit', function(e) {
 });
 
 // ===== CADASTRO =====
-document.getElementById("formCadastro").addEventListener("submit", function(e) {
+document.getElementById("formCadastro").addEventListener("submit", async function(e) {
     e.preventDefault();
 
     const nome = document.getElementById("cadNome").value;
@@ -177,16 +177,35 @@ document.getElementById("formCadastro").addEventListener("submit", function(e) {
         return;
     }
 
-    const usuario = {
-        nome: nome,
-        email: email,
-        senha: senha
-    };
+    try {
 
-    localStorage.setItem("usuario", JSON.stringify(usuario));
+        const resposta = await fetch("http://localhost:3000/cadastro", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                nome,
+                email,
+                senha
+            })
+        });
 
-    alert("Cadastro realizado com sucesso!");
-    this.reset();
+        const dados = await resposta.json();
+
+        if (dados.sucesso) {
+            alert("Cadastro realizado com sucesso!");
+            this.reset();
+        } else {
+            alert("Erro ao cadastrar.");
+        }
+
+    } catch (erro) {
+
+        console.error(erro);
+        alert("Erro ao conectar com o servidor.");
+
+    }
 });
 
 
