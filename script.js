@@ -1,5 +1,6 @@
 // ===== CONFIGURAÇÃO DA API =====
-const API_URL = 'http://localhost:3000/api';
+// Mantido sem o /api para casar exatamente com as rotas criadas no seu server.js
+const API_URL = 'http://localhost:3000';
 
 // ===== LÓGICA DO CARRINHO DE COMPRAS =====
 let carrinho = [];
@@ -97,7 +98,7 @@ function carregarCategoria(tipo) {
 /* Funções auxiliares com botões de adicionar ao carrinho */
 
 function criarPizza(nome, img, p, m, g) {
-    const precoNum = parseFloat(m.replace(',', '.')); // Usa o preço M como padrão de valor
+    const precoNum = parseFloat(m.replace(',', '.')); // Uses Medium price as default numerical value
     return `
     <div class="pizza-item">
         <div class="pizza-left">
@@ -163,6 +164,15 @@ function criarBebida(nome, img, preco) {
 // ===== CONTROLE INTERNO DO CARRINHO =====
 
 function adicionarAoCarrinho(nome, preco) {
+    // TRAVA: Verifica se o usuário está autenticado
+    const logado = localStorage.getItem("logado");
+
+    if (logado !== "true") {
+        alert("Primeiro faça login para poder adicionar ao seu carrinho");
+        showSection('login'); // Redireciona o cliente para a tela de login
+        return; // Interrompe a execução
+    }
+
     const item = {
         nome: nome,
         preco: preco
@@ -212,6 +222,15 @@ function atualizarInterfaceCarrinho() {
 }
 
 function fecharPedido() {
+    // TRAVA ADICIONAL: Garante que só fecha pedido se estiver logado
+    const logado = localStorage.getItem("logado");
+
+    if (logado !== "true") {
+        alert("Primeiro faça login para poder fechar o seu pedido");
+        showSection('login');
+        return;
+    }
+
     if (carrinho.length === 0) {
         alert("Seu carrinho está vazio! Adicione algum item antes de finalizar.");
         return;
