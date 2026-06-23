@@ -1,3 +1,10 @@
+// ===== CONFIGURAÇÃO DA API =====
+const API_URL = 'http://localhost:3000/api';
+
+// ===== LÓGICA DO CARRINHO DE COMPRAS =====
+let carrinho = [];
+const TAXA_ENTREGA = 5.00;
+
 function showSection(sectionId) {
     // Esconde todas as seções
     const sections = document.querySelectorAll('section');
@@ -36,7 +43,6 @@ function carregarCategoria(tipo) {
 
             ${criarPizza("Calabresa","img/pizza-de-calabresa.jpg","35,00", "42,00", "49,00")}
             ${criarPizza("Frango","img/pizza-de-frango.png","28,00", "35,00", "40,00")}
-
             ${criarPizza("Queijo","img/pizza-de-queijo.png","29,00", "31,00", "36,00")}
             ${criarPizza("Portuguesa","img/pizza-portuguesa.jpg","32,00", "38,00", "45,00")}
             ${criarPizza("Camarão","img/pizza-de-camarao.png","45,00", "52,00", "60,00")}
@@ -65,39 +71,38 @@ function carregarCategoria(tipo) {
 
             ${criarPetisco("Filé com fritas","img/file-com-fritas.jpg","40,00")}
             ${criarPetisco("Fritas com Cheddar e Bacon","img/batata-frita.jpg","20,00")}
-
         </div>
         `;
     }
 
     else if (tipo === "bebidas") {
-    html = `
-    <div class="cardapio-content">
-        <h2>Bebidas</h2>
+        html = `
+        <div class="cardapio-content">
+            <h2>Bebidas</h2>
 
-        ${criarBebida("Suco de Limão","img/suco-de-limão.jpeg","7,00")}
-        ${criarBebida("Suco de Laranja","img/suco-de-laranja.jpg","7,00")}
-        ${criarBebida("Suco de Uva","img/suco-de-uva.jpg","7,00")}
-        ${criarBebida("Suco de Cajá","img/suco-de-caja.jpeg","7,00")}
-        ${criarBebida("Coca 1L","img/coca-cola.png","10,00")}
-        ${criarBebida("Devassa","img/devassa.jpg","6,00")}
-        ${criarBebida("Heineken Long Neck","img/heineken.jpg","12,00")}
-
-    </div>
-    `;
-}
+            ${criarBebida("Suco de Limão","img/suco-de-limão.jpeg","7,00")}
+            ${criarBebida("Suco de Laranja","img/suco-de-laranja.jpg","7,00")}
+            ${criarBebida("Suco de Uva","img/suco-de-uva.jpg","7,00")}
+            ${criarBebida("Suco de Cajá","img/suco-de-caja.jpeg","7,00")}
+            ${criarBebida("Coca 1L","img/coca-cola.png","10,00")}
+            ${criarBebida("Devassa","img/devassa.jpg","6,00")}
+            ${criarBebida("Heineken Long Neck","img/heineken.jpg","12,00")}
+        </div>
+        `;
+    }
 
     container.innerHTML = html;
 }
 
-/* Funções auxiliares */
+/* Funções auxiliares com botões de adicionar ao carrinho */
 
 function criarPizza(nome, img, p, m, g) {
+    const precoNum = parseFloat(m.replace(',', '.')); // Usa o preço M como padrão de valor
     return `
     <div class="pizza-item">
         <div class="pizza-left">
             <img src="${img}" alt="${nome}">
-            <h3>${nome}</h3>
+            <h3>${nome} (M)</h3>
         </div>
 
         <div class="pizza-precos">
@@ -105,11 +110,13 @@ function criarPizza(nome, img, p, m, g) {
             <span>M: R$ ${m}</span>
             <span>G: R$ ${g}</span>
         </div>
+        <button onclick="adicionarAoCarrinho('${nome} (M)', ${precoNum})">Adicionar</button>
     </div>
     `;
 }
 
 function criarPastel(nome, img, preco) {
+    const precoNum = parseFloat(preco.replace(',', '.'));
     return `
     <div class="pastel-item">
         <div class="pastel-info">
@@ -118,11 +125,13 @@ function criarPastel(nome, img, preco) {
         </div>
 
         <span>R$ ${preco}</span>
+        <button onclick="adicionarAoCarrinho('${nome}', ${precoNum})">Adicionar</button>
     </div>
     `;
 }
 
 function criarPetisco(nome, img, preco) {
+    const precoNum = parseFloat(preco.replace(',', '.'));
     return `
     <div class="petisco-item">
         <div class="petisco-info">
@@ -131,11 +140,13 @@ function criarPetisco(nome, img, preco) {
         </div>
 
         <span>R$ ${preco}</span>
+        <button onclick="adicionarAoCarrinho('${nome}', ${precoNum})">Adicionar</button>
     </div>
     `;
 }
 
 function criarBebida(nome, img, preco) {
+    const precoNum = parseFloat(preco.replace(',', '.'));
     return `
     <div class="bebida-item">
         <div class="bebida-info">
@@ -144,26 +155,77 @@ function criarBebida(nome, img, preco) {
         </div>
 
         <span>R$ ${preco}</span>
+        <button onclick="adicionarAoCarrinho('${nome}', ${precoNum})">Adicionar</button>
     </div>
     `;
 }
 
-// Validação de senha no cadastro
-const formCadastro = document.querySelector('#cadastro form');
+// ===== CONTROLE INTERNO DO CARRINHO =====
 
-formCadastro.addEventListener('submit', function(e) {
-    const senha = formCadastro.children[2].value;
-    const confirmar = formCadastro.children[3].value;
+function adicionarAoCarrinho(nome, preco) {
+    const item = {
+        nome: nome,
+        preco: preco
+    };
+    
+    carrinho.push(item); // Ordem de adição garantida
+    alert(`${nome} adicionado ao carrinho!`);
+    
+    atualizarInterfaceCarrinho();
+}
 
-    if (senha !== confirmar) {
-        e.preventDefault();
-        alert("As senhas não coincidem!");
-    } else {
-        alert("Cadastro enviado com sucesso!");
+function atualizarInterfaceCarrinho() {
+    // Atualiza a contagem no menu superior
+    const contador = document.getElementById("contador-carrinho");
+    if (contador) {
+        contador.innerText = carrinho.length;
     }
-});
 
-// ===== CADASTRO =====
+    const listaContainer = document.getElementById("lista-carrinho");
+    const valorTotalContainer = document.getElementById("valor-total");
+
+    if (!listaContainer || !valorTotalContainer) return;
+
+    if (carrinho.length === 0) {
+        listaContainer.innerHTML = "<p>Seu carrinho está vazio.</p>";
+        valorTotalContainer.innerText = "R$ 0,00";
+        return;
+    }
+
+    let htmlLista = "";
+    let somaProdutos = 0;
+
+    carrinho.forEach((item) => {
+        somaProdutos += item.preco;
+        htmlLista += `
+            <div style="display: flex; justify-content: space-between; max-width: 400px; margin: 10px auto; border-bottom: 1px solid #ccc; padding: 5px 0;">
+                <span>${item.nome}</span>
+                <strong>R$ ${item.preco.toFixed(2).replace('.', ',')}</strong>
+            </div>
+        `;
+    });
+
+    listaContainer.innerHTML = htmlLista;
+
+    const totalGeral = somaProdutos + TAXA_ENTREGA;
+    valorTotalContainer.innerText = `R$ ${totalGeral.toFixed(2).replace('.', ',')}`;
+}
+
+function fecharPedido() {
+    if (carrinho.length === 0) {
+        alert("Seu carrinho está vazio! Adicione algum item antes de finalizar.");
+        return;
+    }
+
+    alert("Confirmar pedido pronto! Seu pedido foi enviado.");
+    
+    // Limpa a memória local após fechar a compra
+    carrinho = [];
+    atualizarInterfaceCarrinho();
+    showSection('home');
+}
+
+// ===== CADASTRO (PREPARADO PARA A API) =====
 document.getElementById("formCadastro").addEventListener("submit", async function(e) {
     e.preventDefault();
 
@@ -178,61 +240,64 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
     }
 
     try {
-
-        const resposta = await fetch("http://localhost:3000/cadastro", {
+        const resposta = await fetch(`${API_URL}/cadastro`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-                nome,
-                email,
-                senha
-            })
+            body: JSON.stringify({ nome, email, senha })
         });
 
         const dados = await resposta.json();
 
-        if (dados.sucesso) {
-            alert("Cadastro realizado com sucesso!");
+        if (resposta.ok) {
+            alert(dados.message || "Cadastro realizado com sucesso!");
             this.reset();
+            showSection('login');
         } else {
-            alert("Erro ao cadastrar.");
+            alert(dados.error || "Erro ao cadastrar.");
         }
 
     } catch (erro) {
-
         console.error(erro);
         alert("Erro ao conectar com o servidor.");
-
     }
 });
 
-
 // ===== LOGIN =====
-document.getElementById("formLogin").addEventListener("submit", function(e) {
+document.getElementById("formLogin").addEventListener("submit", async function(e) {
     e.preventDefault();
 
     const email = document.getElementById("loginEmail").value;
     const senha = document.getElementById("loginSenha").value;
 
-    const usuarioSalvo = JSON.parse(localStorage.getItem("usuario"));
+    try {
+        const resposta = await fetch(`${API_URL}/login`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ email, senha })
+        });
 
-    if (!usuarioSalvo) {
-        alert("Nenhum usuário cadastrado!");
-        return;
-    }
+        const dados = await resposta.json();
 
-    if (email === usuarioSalvo.email && senha === usuarioSalvo.senha) {
-        localStorage.setItem("logado", "true");
-        alert("Login realizado!");
-        atualizarMenu();
-        this.reset()
-    } else {
-        alert("Email ou senha incorretos!");
+        if (resposta.ok) {
+            localStorage.setItem("logado", "true");
+            localStorage.setItem("nomeUsuario", dados.user.nome);
+            
+            alert(`Bem-vindo(a), ${dados.user.nome}!`);
+            atualizarMenu();
+            this.reset();
+            showSection('home');
+        } else {
+            alert(dados.error || "Email ou senha incorretos!");
+        }
+    } catch (erro) {
+        console.error(erro);
+        alert("Erro ao conectar com o servidor.");
     }
 });
-
 
 // ===== ATUALIZA MENU =====
 function atualizarMenu() {
@@ -245,16 +310,16 @@ function atualizarMenu() {
     }
 }
 
-
 // ===== LOGOUT =====
 function logout() {
     localStorage.removeItem("logado");
+    localStorage.removeItem("nomeUsuario");
     alert("Você saiu!");
     atualizarMenu();
 }
 
-
 // ===== AO CARREGAR A PÁGINA =====
 window.onload = function() {
     atualizarMenu();
+    atualizarInterfaceCarrinho();
 };

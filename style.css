@@ -314,3 +314,21 @@ footer {
 .bebida-item span {
     font-size: 1.1rem;
 }
+
+/* Ajustes para alinhar o botão nos itens do cardápio */
+.pizza-item, .pastel-item, .petisco-item, .bebida-item {
+    justify-content: space-between;
+    max-width: 800px;
+    margin: 0 auto 20px auto;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 15px;
+    border-radius: 8px;
+}
+
+#lista-carrinho {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 500px;
+    margin: 0 auto;
+}

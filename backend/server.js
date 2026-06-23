@@ -6,6 +6,9 @@ import { getFirestore } from "firebase-admin/firestore";
 
 import serviceAccount from "./firebase-key.json" with { type: "json" };
 
+console.log("Projeto:", serviceAccount.project_id);
+console.log("Email:", serviceAccount.client_email);
+
 initializeApp({
     credential: cert(serviceAccount)
 });
