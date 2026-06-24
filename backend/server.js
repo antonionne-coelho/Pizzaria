@@ -37,7 +37,7 @@ app.post("/cadastro", async (req, res) => {
             nome,
             email: emailNormalizado,
             senha,
-            tipo, // Grava a regra de acesso direto na nuvem
+            tipo, 
             criadoEm: new Date()
         });
 
@@ -82,7 +82,7 @@ app.post("/login", async (req, res) => {
             user: {
                 nome: usuarioEncontrado.nome,
                 email: usuarioEncontrado.email,
-                tipo: usuarioEncontrado.tipo || "cliente" // Passa o tipo ("admin" ou "cliente") para a Navbar dinamicamente
+                tipo: usuarioEncontrado.tipo || "cliente" 
             }
         });
     } catch (erro) {
@@ -91,19 +91,21 @@ app.post("/login", async (req, res) => {
     }
 });
 
-// ========== ROTA DE SALVAR PEDIDO (NOVO - PASSO 3) ==========
+// ========== ROTA DE SALVAR PEDIDO ==========
 app.post("/pedidos", async (req, res) => {
     try {
-        // Recebe os dados do carrinho enviados pelo frontend
         const { email_cliente, nome_cliente, itens, total } = req.body;
 
-        // Salva na nova coleção "pedidos" no Firebase
+        if (!email_cliente) {
+            return res.status(400).json({ error: "Sessão inválida. Faça login novamente." });
+        }
+
         const docRef = await db.collection("pedidos").add({
             email_cliente: email_cliente.toLowerCase(),
             nome_cliente,
             itens,
             total,
-            status: "Recebido", // Todo pedido novo entra com esse status por padrão
+            status: "PREPARANDO", // Novo padrão oficial definido
             criadoEm: new Date()
         });
 
@@ -115,6 +117,114 @@ app.post("/pedidos", async (req, res) => {
     } catch (erro) {
         console.error(erro);
         res.status(500).json({ error: "Erro interno ao salvar o pedido." });
+    }
+});
+
+// ========== ROTA DE BUSCAR PEDIDOS DO CLIENTE (PASSO 5) ==========
+app.get("/pedidos/cliente/:email", async (req, res) => {
+    try {
+        const emailNormalizado = req.params.email.toLowerCase();
+        
+        // Puxa do Firebase todos os pedidos onde o email bate com o email enviado
+        const pedidosSnapshot = await db.collection("pedidos")
+            .where("email_cliente", "==", emailNormalizado)
+            .get();
+
+        let meusPedidos = [];
+        pedidosSnapshot.forEach(doc => {
+            meusPedidos.push({
+                id: doc.id, 
+                ...doc.data()
+            });
+        });
+
+        // Ordena no servidor para o pedido mais novo aparecer no topo da lista
+        meusPedidos.sort((a, b) => b.criadoEm._seconds - a.criadoEm._seconds);
+
+        res.status(200).json(meusPedidos);
+    } catch (erro) {
+        console.error(erro);
+        res.status(500).json({ error: "Erro ao buscar o histórico de pedidos." });
+    }
+});
+
+// ========== ROTA DE CANCELAR PEDIDO (PASSO 5 B) ==========
+app.delete("/pedidos/:id", async (req, res) => {
+    try {
+        const idPedido = req.params.id;
+        const pedidoRef = db.collection("pedidos").doc(idPedido);
+        const pedidoDoc = await pedidoRef.get();
+
+        if (!pedidoDoc.exists) {
+            return res.status(404).json({ error: "Pedido não encontrado." });
+        }
+
+        const statusAtual = pedidoDoc.data().status;
+
+        // TRAVA DE SEGURANÇA: Regra de negócio exigida para o cancelamento
+        if (statusAtual === "SAIU PARA ENTREGA" || statusAtual === "FINALIZADO") {
+            return res.status(400).json({ 
+                error: `Cancelamento bloqueado! O status atual do pedido é: ${statusAtual}` 
+            });
+        }
+
+        // Se passar pela trava (estiver como "PREPARANDO"), deleta o pedido
+        await pedidoRef.delete();
+
+        res.status(200).json({ sucesso: true, message: "Seu pedido foi cancelado com sucesso." });
+    } catch (erro) {
+        console.error(erro);
+        res.status(500).json({ error: "Erro interno ao tentar cancelar o pedido." });
+    }
+});
+
+// ========== ROTA DE BUSCAR TODOS OS PEDIDOS (ADMIN - PASSO 7) ==========
+app.get("/pedidos/todos", async (req, res) => {
+    try {
+        const pedidosSnapshot = await db.collection("pedidos").get();
+        let todosPedidos = [];
+
+        pedidosSnapshot.forEach(doc => {
+            todosPedidos.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+
+        // Ordena para que o painel mostre sempre os pedidos mais novos no topo
+        todosPedidos.sort((a, b) => b.criadoEm._seconds - a.criadoEm._seconds);
+
+        res.status(200).json(todosPedidos);
+    } catch (erro) {
+        console.error(erro);
+        res.status(500).json({ error: "Erro ao buscar a lista geral de pedidos." });
+    }
+});
+
+// ========== ROTA DE ATUALIZAR STATUS DO PEDIDO (ADMIN - PASSO 8) ==========
+app.put("/pedidos/:id/status", async (req, res) => {
+    try {
+        const idPedido = req.params.id;
+        const { status } = req.body; 
+
+        if (!status) {
+            return res.status(400).json({ error: "O novo status não foi informado." });
+        }
+
+        const pedidoRef = db.collection("pedidos").doc(idPedido);
+        const pedidoDoc = await pedidoRef.get();
+
+        if (!pedidoDoc.exists) {
+            return res.status(404).json({ error: "Pedido não encontrado no banco." });
+        }
+
+        // Faz o update apenas do campo status no Firebase
+        await pedidoRef.update({ status: status });
+
+        res.status(200).json({ sucesso: true, message: `Status do pedido atualizado para: ${status}` });
+    } catch (erro) {
+        console.error(erro);
+        res.status(500).json({ error: "Erro interno ao tentar atualizar o status do pedido." });
     }
 });
 

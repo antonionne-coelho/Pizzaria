@@ -18,6 +18,9 @@
                 <li><a href="#" onclick="showSection('home')">Home</a></li>
                 <li><a href="#" onclick="showSection('cardapio')">Cardápio</a></li>
                 <li><a href="#" onclick="showSection('carrinho')">Carrinho (<span id="contador-carrinho">0</span>)</a></li>
+                
+                <li id="menuMeusPedidos" style="display:none;"><a href="#" onclick="abrirMeusPedidos()">Meus Pedidos</a></li>
+                
                 <li><a href="#" onclick="showSection('clientes')">Clientes</a></li>
                 
                 <li id="menuCadastro"><a href="#" onclick="showSection('cadastro')">Cadastrar</a></li>
@@ -53,6 +56,19 @@
 
             <div id="conteudo-cardapio" class="cardapio-bg">
             </div>
+        </section>
+
+        <section id="meus-pedidos" style="display:none;">
+            <h2>Meus Pedidos</h2>
+            <p style="margin-bottom: 20px;">Acompanhe o status das suas compras abaixo:</p>
+
+            <div id="container-meus-pedidos" style="display: flex; flex-direction: column; gap: 15px; align-items: center;">
+            </div>
+        </section>
+
+        <section id="painel-admin" style="display: none; padding: 20px;">
+            <h2>Painel da Cozinha (Administrador)</h2>
+            <div id="container-admin-pedidos"></div>
         </section>
 
         <section id="clientes" style="display:none;">
