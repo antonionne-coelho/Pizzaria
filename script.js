@@ -1,5 +1,4 @@
 // ===== CONFIGURAÇÃO DA API =====
-// Mantido sem o /api para casar exatamente com as rotas criadas no seu server.js
 const API_URL = 'http://localhost:3000';
 
 // ===== LÓGICA DO CARRINHO DE COMPRAS =====
@@ -7,16 +6,12 @@ let carrinho = [];
 const TAXA_ENTREGA = 5.00;
 
 function showSection(sectionId) {
-    // Esconde todas as seções
     const sections = document.querySelectorAll('section');
     sections.forEach(sec => {
         sec.style.display = 'none';
     });
-
-    // Mostrando apenas a seção clicada
     const target = document.getElementById(sectionId);
     if (target) {
-        // Se for home, usamos flex para centralizar o texto da capa
         target.style.display = (sectionId === 'home') ? 'flex' : 'block';
     }
 }
@@ -83,11 +78,10 @@ function carregarCategoria(tipo) {
         </div>
         `;
     }
-
     container.innerHTML = html;
 }
 
-/* Funções auxiliares */
+/* Funções auxiliares mantidas integralmente */
 function criarPizza(nome, img, p, m, g) {
     const precoNum = parseFloat(m.replace(',', '.')); 
     return `
@@ -151,16 +145,14 @@ function criarBebida(nome, img, preco) {
 // ===== CONTROLE DO CARRINHO =====
 function adicionarAoCarrinho(nome, preco) {
     const logado = localStorage.getItem("logado");
-
     if (logado !== "true") {
-        alert("Primeiro faça login para poder adicionar ao seu carrinho");
+        alert("Primeiro faça login!");
         showSection('login'); 
         return; 
     }
-
     const item = { nome: nome, preco: preco };
     carrinho.push(item); 
-    alert(`${nome} adicionado ao carrinho!`);
+    alert(`${nome} adicionado!`);
     atualizarInterfaceCarrinho();
 }
 
@@ -199,17 +191,8 @@ function atualizarInterfaceCarrinho() {
 
 async function fecharPedido() {
     const logado = localStorage.getItem("logado");
-
-    if (logado !== "true") {
-        alert("Primeiro faça login para poder fechar o seu pedido");
-        showSection('login');
-        return;
-    }
-
-    if (carrinho.length === 0) {
-        alert("Seu carrinho está vazio! Adicione algum item antes de finalizar.");
-        return;
-    }
+    if (logado !== "true") { alert("Faça login!"); showSection('login'); return; }
+    if (carrinho.length === 0) { alert("Carrinho vazio!"); return; }
 
     let somaProdutos = 0;
     carrinho.forEach((item) => { somaProdutos += item.preco; });
@@ -230,21 +213,17 @@ async function fecharPedido() {
             })
         });
 
-        const dados = await resposta.json();
-
         if (resposta.ok) {
-            alert(dados.message || "Pedido enviado com sucesso para a cozinha!");
+            alert("Pedido enviado!");
             carrinho = [];
             atualizarInterfaceCarrinho();
-            
-            // Em vez de ir pra Home, já manda o cliente pra tela de Meus Pedidos pra ele ver a mágica!
             abrirMeusPedidos(); 
         } else {
-            alert(dados.error || "Erro ao fechar o pedido.");
+            alert("Erro ao fechar o pedido.");
         }
     } catch (erro) {
         console.error(erro);
-        alert("Erro ao conectar com o servidor. Tente novamente.");
+        alert("Erro ao conectar.");
     }
 }
 
@@ -259,240 +238,136 @@ async function carregarMeusPedidos() {
     if (!email) return;
 
     const container = document.getElementById("container-meus-pedidos");
-    container.innerHTML = "<p>Carregando seus pedidos...</p>";
+    container.innerHTML = "<p>Carregando...</p>";
 
     try {
         const resposta = await fetch(`${API_URL}/pedidos/cliente/${email}`);
         const pedidos = await resposta.json();
-
-        if (!resposta.ok) {
-            container.innerHTML = `<p style="color:red;">Erro: ${pedidos.error}</p>`;
-            return;
-        }
-
-        if (pedidos.length === 0) {
-            container.innerHTML = "<p>Você ainda não fez nenhum pedido.</p>";
-            return;
-        }
-
+        
         let html = "";
         pedidos.forEach(pedido => {
-            // Formatar Data e Hora
-            let dataFormatada = "Data desconhecida";
-            if (pedido.criadoEm && pedido.criadoEm._seconds) {
-                const data = new Date(pedido.criadoEm._seconds * 1000);
-                dataFormatada = data.toLocaleString('pt-BR');
-            }
-
-            // Lista os produtos do pedido
-            let itensHtml = "<ul style='text-align: left; margin: 10px 0; padding-left: 20px;'>";
-            pedido.itens.forEach(item => {
-                itensHtml += `<li>${item.nome} - R$ ${item.preco.toFixed(2).replace('.', ',')}</li>`;
-            });
-            itensHtml += "</ul>";
-
-            // Lógica das cores e botão do Status
-            let corStatus = "#f39c12"; // Laranja para Preparando
-            let botaoCancelar = `<button onclick="cancelarPedido('${pedido.id}')" style="background-color: #e74c3c; width: 100%; margin-top: 10px; border-radius: 4px;">Cancelar Pedido</button>`;
+            let dataFormatada = pedido.criadoEm ? new Date(pedido.criadoEm._seconds * 1000).toLocaleString('pt-BR') : "Data desconhecida";
+            let itensHtml = `<ul>${pedido.itens.map(i => `<li>${i.nome}</li>`).join('')}</ul>`;
+            let botao = (pedido.status === "PREPARANDO") ? `<button onclick="cancelarPedido('${pedido.id}')">Cancelar Pedido</button>` : `<p>Status: ${pedido.status}</p>`;
             
-            if (pedido.status === "SAIU PARA ENTREGA") {
-                corStatus = "#3498db"; // Azul
-                botaoCancelar = `<p style="color: #7f8c8d; font-size: 0.9rem; margin-top: 10px;">O entregador já saiu. Cancelamento indisponível.</p>`;
-            } else if (pedido.status === "FINALIZADO") {
-                corStatus = "#2ecc71"; // Verde
-                botaoCancelar = `<p style="color: #7f8c8d; font-size: 0.9rem; margin-top: 10px;">Pedido entregue com sucesso!</p>`;
-            }
-
-            html += `
-                <div style="background: rgba(255, 255, 255, 0.9); border-radius: 8px; padding: 20px; width: 100%; max-width: 500px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); color: #333;">
-                    <h3 style="border-bottom: 1px solid #ccc; padding-bottom: 10px; margin-bottom: 10px;">Data: ${dataFormatada}</h3>
-                    <p style="font-size: 1.1rem;"><strong>Status:</strong> <span style="color: ${corStatus}; font-weight: bold;">${pedido.status}</span></p>
-                    ${itensHtml}
-                    <p style="font-size: 1.2rem; margin-top: 10px;"><strong>Total: R$ ${pedido.total.toFixed(2).replace('.', ',')}</strong></p>
-                    ${botaoCancelar}
-                </div>
-            `;
+            html += `<div class="pedido-card"><h3>${dataFormatada}</h3>${itensHtml}<p>Total: R$ ${pedido.total.toFixed(2)}</p>${botao}</div>`;
         });
-
-        container.innerHTML = html;
-
-    } catch (erro) {
-        console.error(erro);
-        container.innerHTML = "<p style='color:red;'>Erro ao conectar com o servidor.</p>";
-    }
+        container.innerHTML = html || "<p>Nenhum pedido.</p>";
+    } catch (e) { container.innerHTML = "<p>Erro.</p>"; }
 }
 
 async function cancelarPedido(idPedido) {
-    const confirmacao = confirm("Tem certeza que deseja cancelar este pedido? Essa ação não pode ser desfeita.");
-    if (!confirmacao) return;
-
+    if (!confirm("Cancelar?")) return;
     try {
-        const resposta = await fetch(`${API_URL}/pedidos/${idPedido}`, {
-            method: "DELETE"
+        const resposta = await fetch(`${API_URL}/pedidos/${idPedido}`, { method: "DELETE" });
+        if (resposta.ok) { carregarMeusPedidos(); }
+    } catch (e) { alert("Erro."); }
+}
+
+// ===== PAINEL DO ADMINISTRADOR (PASSO 9) =====
+function abrirPainelAdmin() {
+    showSection('painel-admin');
+    carregarPedidosAdmin();
+}
+
+async function carregarPedidosAdmin() {
+    const container = document.getElementById("container-admin-pedidos");
+    container.innerHTML = "<p>Carregando...</p>";
+    try {
+        const resposta = await fetch(`${API_URL}/pedidos/todos`);
+        const todosPedidos = await resposta.json();
+        let html = "";
+        todosPedidos.forEach(pedido => {
+            html += `
+                <div style="background: #fff; border: 1px solid #ccc; padding: 15px; margin: 10px auto; max-width: 500px; border-radius: 8px;">
+                    <p><strong>Cliente:</strong> ${pedido.nome_cliente}</p>
+                    <p><strong>Status:</strong> ${pedido.status}</p>
+                    <button onclick="mudarStatus('${pedido.id}', 'SAIU PARA ENTREGA')">Saiu para Entrega</button>
+                    <button onclick="mudarStatus('${pedido.id}', 'FINALIZADO')" style="background-color: #2ecc71;">Finalizar</button>
+                </div>
+            `;
         });
+        container.innerHTML = html;
+    } catch (e) { container.innerHTML = "<p>Erro ao carregar.</p>"; }
+}
 
-        const dados = await resposta.json();
-
-        if (resposta.ok) {
-            alert(dados.message);
-            carregarMeusPedidos(); // Recarrega a tela instantaneamente para sumir com o cartão
-        } else {
-            alert(dados.error);
-        }
-    } catch (erro) {
-        console.error(erro);
-        alert("Erro de conexão ao tentar cancelar.");
-    }
+async function mudarStatus(id, novoStatus) {
+    try {
+        const resposta = await fetch(`${API_URL}/pedidos/${id}/status`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: novoStatus })
+        });
+        if (resposta.ok) { alert("Atualizado!"); carregarPedidosAdmin(); }
+    } catch (e) { alert("Erro."); }
 }
 
 // ===== CADASTRO =====
 document.getElementById("formCadastro").addEventListener("submit", async function(e) {
     e.preventDefault();
-
-    const nome = document.getElementById("cadNome").value;
-    const email = document.getElementById("cadEmail").value;
-    const senha = document.getElementById("cadSenha").value;
-    const confirmar = document.getElementById("cadConfirmar").value;
-
-    if (senha !== confirmar) {
-        alert("As senhas não coincidem!");
-        return;
-    }
-
+    const [nome, email, senha, confirmar] = [document.getElementById("cadNome").value, document.getElementById("cadEmail").value, document.getElementById("cadSenha").value, document.getElementById("cadConfirmar").value];
+    if (senha !== confirmar) { alert("Senhas diferentes!"); return; }
     try {
-        const resposta = await fetch(`${API_URL}/cadastro`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ nome, email, senha })
-        });
-
-        const dados = await resposta.json();
-
-        if (resposta.ok) {
-            alert(dados.message || "Cadastro realizado com sucesso!");
-            this.reset();
-            showSection('login');
-        } else {
-            alert(dados.error || "Erro ao cadastrar.");
-        }
-    } catch (erro) {
-        console.error(erro);
-        alert("Erro ao conectar com o servidor.");
-    }
+        const res = await fetch(`${API_URL}/cadastro`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nome, email, senha }) });
+        if (res.ok) { alert("Cadastrado!"); showSection('login'); }
+    } catch (e) { alert("Erro."); }
 });
 
 // ===== LOGIN =====
 document.getElementById("formLogin").addEventListener("submit", async function(e) {
     e.preventDefault();
-
-    const logadoAtualmente = localStorage.getItem("logado");
-    if (logadoAtualmente === "true") {
-        const usuarioAtivo = localStorage.getItem("nomeUsuario");
-        alert(`Já existe um usuário logado (${usuarioAtivo}). Por favor, saia primeiro para poder entrar com outra conta.`);
-        return;
-    }
-
-    const email = document.getElementById("loginEmail").value;
-    const senha = document.getElementById("loginSenha").value;
-
+    const [email, senha] = [document.getElementById("loginEmail").value, document.getElementById("loginSenha").value];
     try {
-        const resposta = await fetch(`${API_URL}/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, senha })
-        });
-
-        const dados = await resposta.json();
-
-        if (resposta.ok) {
+        const res = await fetch(`${API_URL}/login`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, senha }) });
+        const dados = await res.json();
+        if (res.ok) {
             localStorage.setItem("logado", "true");
             localStorage.setItem("nomeUsuario", dados.user.nome);
             localStorage.setItem("emailUsuario", dados.user.email);
-            localStorage.setItem("tipoUsuario", dados.user.tipo); 
-            
-            alert(`Bem-vindo(a), ${dados.user.nome}!`);
-            atualizarMenu();
-            this.reset();
-            showSection('home');
-        } else {
-            alert(dados.error || "Email ou senha incorretos!");
-        }
-    } catch (erro) {
-        console.error(erro);
-        alert("Erro ao conectar com o servidor.");
-    }
+            localStorage.setItem("tipoUsuario", dados.user.tipo);
+            atualizarMenu(); showSection('home');
+        } else { alert(dados.error); }
+    } catch (e) { alert("Erro."); }
 });
 
 // ===== ATUALIZA MENU =====
 function atualizarMenu() {
     const logado = localStorage.getItem("logado");
-    const nomeUsuario = localStorage.getItem("nomeUsuario");
-    const tipoUsuario = localStorage.getItem("tipoUsuario");
-
-    const btnCadastro = document.getElementById("menuCadastro");
-    const btnLogin = document.getElementById("menuLogin");
+    const tipo = localStorage.getItem("tipoUsuario");
     const containerUsuario = document.getElementById("menuUsuario");
-    const spanNomeNav = document.getElementById("nomeUsuarioNav");
-    const btnMeusPedidos = document.getElementById("menuMeusPedidos"); 
+    const btnAdminExistente = document.getElementById("btnAdminNav");
+    
+    if (btnAdminExistente) btnAdminExistente.remove();
 
     if (logado === "true") {
-        if (btnCadastro) btnCadastro.style.display = "none";
-        if (btnLogin) btnLogin.style.display = "none";
-        
-        if (spanNomeNav) spanNomeNav.innerText = nomeUsuario;
-        if (containerUsuario) containerUsuario.style.display = "block";
-        
-        if (btnMeusPedidos) {
-            btnMeusPedidos.style.display = (tipoUsuario === "cliente") ? "block" : "none";
+        document.getElementById("menuCadastro").style.display = "none";
+        document.getElementById("menuLogin").style.display = "none";
+        containerUsuario.style.display = "block";
+        document.getElementById("nomeUsuarioNav").innerText = localStorage.getItem("nomeUsuario");
+        document.getElementById("menuMeusPedidos").style.display = (tipo === "admin") ? "none" : "block";
+
+        if (tipo === "admin") {
+            const adminLi = document.createElement("li");
+            adminLi.id = "btnAdminNav";
+            adminLi.innerHTML = `<a href="#" onclick="abrirPainelAdmin()" style="color: #ffcc00;">Painel Cozinha</a>`;
+            document.querySelector(".nav-links").insertBefore(adminLi, containerUsuario);
         }
     } else {
-        if (btnCadastro) btnCadastro.style.display = "block";
-        if (btnLogin) btnLogin.style.display = "block";
-        
-        if (containerUsuario) containerUsuario.style.display = "none";
-        if (btnMeusPedidos) btnMeusPedidos.style.display = "none";
+        document.getElementById("menuCadastro").style.display = "block";
+        document.getElementById("menuLogin").style.display = "block";
+        containerUsuario.style.display = "none";
+        document.getElementById("menuMeusPedidos").style.display = "none";
     }
 }
 
-// ===== CONTROLE DO MENU DROPDOWN POR CLIQUE =====
-function toggleDropdown(evento) {
-    evento.preventDefault(); 
-    const dropdown = document.querySelector('.dropdown-content');
-    if (dropdown) {
-        dropdown.classList.toggle('show'); 
-    }
-}
-
-window.addEventListener('click', function(e) {
-    if (!e.target.matches('.usuario-link') && !e.target.matches('#nomeUsuarioNav')) {
-        const dropdown = document.querySelector('.dropdown-content');
-        if (dropdown && dropdown.classList.contains('show')) {
-            dropdown.classList.remove('show');
-        }
-    }
-});
-
-// ===== LOGOUT (AJUSTADO) =====
+// ===== UTILITÁRIOS =====
+function toggleDropdown(e) { e.preventDefault(); document.querySelector('.dropdown-content').classList.toggle('show'); }
 function logout() {
-    localStorage.removeItem("logado");
-    localStorage.removeItem("nomeUsuario");
-    localStorage.removeItem("emailUsuario");
-    localStorage.removeItem("tipoUsuario"); 
-    
-    const dropdown = document.querySelector('.dropdown-content');
-    if (dropdown) dropdown.classList.remove('show');
-
-    // AJUSTE: Zera o carrinho e atualiza o visual da tela antes de voltar para a Home
+    localStorage.clear();
     carrinho = [];
     atualizarInterfaceCarrinho();
-
+    atualizarMenu();
+    showSection('home');
     alert("Você saiu!");
-    atualizarMenu();
-    showSection('home'); 
 }
-
-// ===== AO CARREGAR A PÁGINA =====
-window.onload = function() {
-    atualizarMenu();
-    atualizarInterfaceCarrinho();
-};
+window.onload = () => { atualizarMenu(); atualizarInterfaceCarrinho(); };
