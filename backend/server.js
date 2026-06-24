@@ -228,6 +228,26 @@ app.put("/pedidos/:id/status", async (req, res) => {
     }
 });
 
+// ========== ROTA DE RELATÓRIO DE FATURAMENTO (PASSO 10) ==========
+app.get("/pedidos/faturamento", async (req, res) => {
+    try {
+        const pedidosSnapshot = await db.collection("pedidos")
+            .where("status", "==", "FINALIZADO")
+            .get();
+
+        let totalFaturado = 0;
+        pedidosSnapshot.forEach(doc => {
+            const pedido = doc.data();
+            totalFaturado += pedido.total || 0;
+        });
+
+        res.status(200).json({ total: totalFaturado.toFixed(2) });
+    } catch (erro) {
+        console.error(erro);
+        res.status(500).json({ error: "Erro ao calcular faturamento." });
+    }
+});
+
 const PORT = 3000;
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
