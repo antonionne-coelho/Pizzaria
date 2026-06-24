@@ -19,17 +19,21 @@
                 <li><a href="#" onclick="showSection('cardapio')">Cardápio</a></li>
                 <li><a href="#" onclick="showSection('carrinho')">Carrinho (<span id="contador-carrinho">0</span>)</a></li>
                 <li><a href="#" onclick="showSection('clientes')">Clientes</a></li>
-                <li><a href="#" onclick="showSection('cadastro')">Cadastrar</a></li>
-                <li><a href="#" onclick="showSection('login')">Login</a></li>
-                <li id="menuUsuario" style="display:none;">
-                    <a href="#" onclick="logout()">Sair</a>
+                
+                <li id="menuCadastro"><a href="#" onclick="showSection('cadastro')">Cadastrar</a></li>
+                <li id="menuLogin"><a href="#" onclick="showSection('login')">Login</a></li>
+                
+                <li id="menuUsuario" class="dropdown" style="display:none;">
+                    <a href="#" class="usuario-link" onclick="toggleDropdown(event)">Olá, <span id="nomeUsuarioNav">Cliente</span> ▼</a>
+                    <ul class="dropdown-content">
+                        <li><a href="#" onclick="logout()">Sair</a></li>
+                    </ul>
                 </li>
             </ul>
         </nav>
     </header>
 
     <main id="content">
-        <!-- Seção Home (Capa) -->
         <section id="home" class="active-section">
             <div class="hero-text">
                 <h1>A Melhor Pizza de Canguaretama</h1>
@@ -40,7 +44,6 @@
         <section id="cardapio" style="display:none;">
             <h2>Nosso Cardápio</h2>
 
-        <!-- Categorias -->
             <div class="menu-categorias">
                 <button onclick="carregarCategoria('pizzas')">Pizzas</button>
                 <button onclick="carregarCategoria('pasteis')">Pastéis</button>
@@ -48,13 +51,10 @@
                 <button onclick="carregarCategoria('bebidas')">Bebidas</button>
             </div>
 
-            <!-- Conteúdo dinâmico -->
             <div id="conteudo-cardapio" class="cardapio-bg">
-                <!-- Conteúdo aparece aqui -->
             </div>
         </section>
 
-        <!-- Seção Clientes -->
         <section id="clientes" style="display:none;">
             <h2>Galeria de Clientes</h2>
 
@@ -78,10 +78,8 @@
                 <input type="password" id="cadConfirmar" placeholder="Confirmar Senha" required minlength="6">
                 <button type="submit">Enviar Cadastro</button>
             </form>
-    
         </section>
 
-        <!-- Seção Login -->
         <section id="login" style="display:none;">
             <h2>Login</h2>
 
@@ -95,16 +93,15 @@
         <section id="carrinho" style="display:none;">
             <h2>Seu Carrinho</h2>
 
-    <div id="lista-carrinho">
-        </div>
+            <div id="lista-carrinho"></div>
 
-    <div id="resumo-valores" style="margin-top: 20px; font-size: 1.2rem;">
-        <p>Taxa de Entrega: <strong style="color: #e67e22;">R$ 5,00</strong></p>
-        <p>Total do Pedido: <strong id="valor-total" style="font-size: 1.5rem; color: green;">R$ 0,00</strong></p>
-    </div>
+            <div id="resumo-valores" style="margin-top: 20px; font-size: 1.2rem;">
+                <p>Taxa de Entrega: <strong style="color: #e67e22;">R$ 5,00</strong></p>
+                <p>Total do Pedido: <strong id="valor-total" style="font-size: 1.5rem; color: green;">R$ 0,00</strong></p>
+            </div>
 
-            <button id="btn-fechar-pedido" onclick="fecharPedido()"             style="margin-top:  20px; width: 100%; max-width: 400px;">
-            Confirmar Pedido Pronto
+            <button id="btn-fechar-pedido" onclick="fecharPedido()" style="margin-top: 20px; width: 100%; max-width: 400px;">
+                Confirmar Pedido Pronto
             </button>
         </section>
 

@@ -41,10 +41,12 @@ nav {
 .nav-links {
     display: flex;
     list-style: none;
+    align-items: center;
 }
 
 .nav-links li {
     margin: 0 15px;
+    position: relative; /* Mantido para servir de âncora para a caixinha absoluta */
 }
 
 .nav-links a {
@@ -58,6 +60,57 @@ nav {
     color: #ffcc00;
 }
 
+/* ===== ESTILOS DO MENU DROPDOWN POR CLIQUE (100% SEGURO) ===== */
+.usuario-link {
+    color: #ffcc00 !important; /* Destaca o nome do usuário logado em dourado */
+    font-weight: bold;
+    display: inline-block;
+    cursor: pointer;
+    user-select: none; /* Impede que o texto fique selecionado em azul ao clicar rápido */
+}
+
+.dropdown-content {
+    display: none; /* Começa rigorosamente escondido */
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #444;
+    min-width: 130px;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.3);
+    border-radius: 4px;
+    list-style: none;
+    padding: 0;
+    margin-top: 10px; /* Afastamento confortável sem risco de fechar sozinho */
+    z-index: 1100;
+}
+
+.dropdown-content li {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100%;
+}
+
+.dropdown-content a {
+    display: block;
+    padding: 12px 15px; /* Botão maior e mais fácil de clicar */
+    color: white;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: background 0.2s;
+    border-radius: 4px;
+}
+
+.dropdown-content a:hover {
+    background-color: #e67e22;
+    color: white;
+}
+
+/* O JavaScript vai ativar essa classe ao identificar o clique do usuário */
+.dropdown-content.show {
+    display: block;
+}
+
 /* Background da Home (Capa) */
 #home {
     height: 100vh;
@@ -65,7 +118,7 @@ nav {
                 url('https://images.ecycle.com.br/wp-content/uploads/2022/08/29114204/pexels-narda-yescas-1566837-scaled.jpg.webp');
     background-size: cover;
     background-position: center;
-    display: flex; /* Mantido para centralizar o texto da hero */
+    display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -133,121 +186,48 @@ button:hover {
 /* Fundo dinâmico do cardápio */
 .cardapio-bg {
     margin-top: 30px;
-    min-height: 500px; /* Aumentei um pouco para a imagem aparecer melhor */
+    min-height: 500px;
     border-radius: 10px;
     padding: 20px;
-    
-    /* Configurações para a imagem ficar centralizada e ajustável (responsiva) */
     background-position: center;
     background-repeat: no-repeat;
-    background-size: cover; /* Faz a imagem cobrir o espaço sem distorcer */
-    
-    /* Transição suave ao trocar de categoria */
+    background-size: cover;
     transition: background-image 0.5s ease-in-out;
 }
 
 /* Conteúdo carregado com fundo branco opaco */
 .cardapio-content {
-    /* O valor 0.85 deixa 85% de branco, permitindo ver a imagem por trás */
     background: rgba(255, 255, 255, 0.50); 
     border-radius: 10px;
     padding: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2); /* Sombra para dar profundidade */
-    /*backdrop-filter: blur(5px); /* Efeito opcional: desfoca levemente a imagem atrás do branco */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
-.pizza-item {
+/* Configurações Globais dos Itens do Cardápio */
+.pizza-item, .pastel-item, .petisco-item, .bebida-item {
     display: flex;
     align-items: center;
-    gap: 20px;
-    margin-bottom: 15px;
+    justify-content: space-between;
+    max-width: 800px;
+    margin: 0 auto 20px auto;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 15px;
+    border-radius: 8px;
 }
 
-/* imagem + nome */
-.pizza-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 250px;
-}
-
-/* preços agora ficam perto */
-.pizza-precos {
-    display: flex;
-    gap: 10px;
-}
-
+/* Imagens dos Produtos */
 .pizza-item img {
-     width: 120px;
+    width: 120px;
     height: 120px;
     object-fit: cover;
     border-radius: 10px;
 }    
 
-.pizza-info {
-    flex: 1;
-}
-
-.pizza-precos {
-    display: flex;
-    gap: 15px;
-}
-
-/* Pastel */
-.pastel-item {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 15px;
-}
-
-.pastel-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.pastel-item img {
+.pastel-item img, .petisco-item img {
     width: 100px;
     height: 80px;
     object-fit: cover;
     border-radius: 10px;
-}
-
-/* Petiscos */
-.petisco-item {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 15px;
-}
-
-.petisco-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.petisco-item img {
-    width: 100px;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 10px;
-}
-
-
-/* Bebidas */
-.bebida-item {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 15px;
-}
-
-.bebida-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
 }
 
 .bebida-item img {
@@ -257,6 +237,30 @@ button:hover {
     border-radius: 10px;
 }
 
+/* Estruturas de Alinhamento Interno */
+.pizza-left, .pastel-info, .petisco-info, .bebida-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    min-width: 250px;
+}
+
+.pizza-precos {
+    display: flex;
+    gap: 15px;
+}
+
+/* Fontes, Tamanhos e Negritos dos Produtos */
+.pizza-item h3, .pastel-item h3, .petisco-item h3, .bebida-item h3 {
+    font-size: 1.5rem;
+}
+
+.pizza-precos span, .pastel-item span, .petisco-item span, .bebida-item span {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+/* Galeria de Fotos */
 .galeria {
     margin-top: 30px;
     display: flex;
@@ -272,6 +276,7 @@ button:hover {
     border-radius: 10px;
 }
 
+/* Validações Visuais de Input */
 input:invalid {
     border: 2px solid red;
 }
@@ -289,40 +294,6 @@ footer {
     text-align: center;
     padding: 10px;
     font-size: 0.9rem;
-}
-
-/* Pra colocar o texto dos  preços em negrito*/
-.pizza-precos span,
-.pastel-item span,
-.petisco-item span,
-.bebida-item span {
-    font-weight: bold;
-}
-
-/* Pra alterar o tamanho do nome dos produtos */
-.pizza-item h3,
-.pastel-item h3,
-.petisco-item h3,
-.bebida-item h3 {
-    font-size: 1.5rem;
-}
-
-/* Tamanho dos preços */
-.pizza-precos span,
-.pastel-item span,
-.petisco-item span,
-.bebida-item span {
-    font-size: 1.1rem;
-}
-
-/* Ajustes para alinhar o botão nos itens do cardápio */
-.pizza-item, .pastel-item, .petisco-item, .bebida-item {
-    justify-content: space-between;
-    max-width: 800px;
-    margin: 0 auto 20px auto;
-    background: rgba(255, 255, 255, 0.8);
-    padding: 15px;
-    border-radius: 8px;
 }
 
 #lista-carrinho {

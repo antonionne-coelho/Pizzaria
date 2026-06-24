@@ -98,7 +98,7 @@ function carregarCategoria(tipo) {
 /* Funções auxiliares com botões de adicionar ao carrinho */
 
 function criarPizza(nome, img, p, m, g) {
-    const precoNum = parseFloat(m.replace(',', '.')); // Uses Medium price as default numerical value
+    const precoNum = parseFloat(m.replace(',', '.')); 
     return `
     <div class="pizza-item">
         <div class="pizza-left">
@@ -164,13 +164,12 @@ function criarBebida(nome, img, preco) {
 // ===== CONTROLE INTERNO DO CARRINHO =====
 
 function adicionarAoCarrinho(nome, preco) {
-    // TRAVA: Verifica se o usuário está autenticado
     const logado = localStorage.getItem("logado");
 
     if (logado !== "true") {
         alert("Primeiro faça login para poder adicionar ao seu carrinho");
-        showSection('login'); // Redireciona o cliente para a tela de login
-        return; // Interrompe a execução
+        showSection('login'); 
+        return; 
     }
 
     const item = {
@@ -178,14 +177,13 @@ function adicionarAoCarrinho(nome, preco) {
         preco: preco
     };
     
-    carrinho.push(item); // Ordem de adição garantida
+    carrinho.push(item); 
     alert(`${nome} adicionado ao carrinho!`);
     
     atualizarInterfaceCarrinho();
 }
 
 function atualizarInterfaceCarrinho() {
-    // Atualiza a contagem no menu superior
     const contador = document.getElementById("contador-carrinho");
     if (contador) {
         contador.innerText = carrinho.length;
@@ -221,8 +219,8 @@ function atualizarInterfaceCarrinho() {
     valorTotalContainer.innerText = `R$ ${totalGeral.toFixed(2).replace('.', ',')}`;
 }
 
-function fecharPedido() {
-    // TRAVA ADICIONAL: Garante que só fecha pedido se estiver logado
+// PASSO 4: Enviar o pedido para o banco de dados
+async function fecharPedido() {
     const logado = localStorage.getItem("logado");
 
     if (logado !== "true") {
@@ -236,15 +234,50 @@ function fecharPedido() {
         return;
     }
 
-    alert("Confirmar pedido pronto! Seu pedido foi enviado.");
-    
-    // Limpa a memória local após fechar a compra
-    carrinho = [];
-    atualizarInterfaceCarrinho();
-    showSection('home');
+    // Calcula o total
+    let somaProdutos = 0;
+    carrinho.forEach((item) => {
+        somaProdutos += item.preco;
+    });
+    const totalGeral = somaProdutos + TAXA_ENTREGA;
+
+    // Recupera os dados do usuário para atrelar ao pedido
+    const emailUsuario = localStorage.getItem("emailUsuario");
+    const nomeUsuario = localStorage.getItem("nomeUsuario");
+
+    try {
+        const resposta = await fetch(`${API_URL}/pedidos`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                email_cliente: emailUsuario,
+                nome_cliente: nomeUsuario,
+                itens: carrinho,
+                total: totalGeral
+            })
+        });
+
+        const dados = await resposta.json();
+
+        if (resposta.ok) {
+            alert(dados.message || "Pedido enviado com sucesso para a cozinha!");
+            
+            // Limpa o carrinho localmente após o sucesso
+            carrinho = [];
+            atualizarInterfaceCarrinho();
+            showSection('home');
+        } else {
+            alert(dados.error || "Erro ao fechar o pedido.");
+        }
+    } catch (erro) {
+        console.error(erro);
+        alert("Erro ao conectar com o servidor. Tente novamente.");
+    }
 }
 
-// ===== CADASTRO (PREPARADO PARA A API) =====
+// ===== CADASTRO =====
 document.getElementById("formCadastro").addEventListener("submit", async function(e) {
     e.preventDefault();
 
@@ -287,6 +320,13 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
 document.getElementById("formLogin").addEventListener("submit", async function(e) {
     e.preventDefault();
 
+    const logadoAtualmente = localStorage.getItem("logado");
+    if (logadoAtualmente === "true") {
+        const usuarioAtivo = localStorage.getItem("nomeUsuario");
+        alert(`Já existe um usuário logado (${usuarioAtivo}). Por favor, saia primeiro para poder entrar com outra conta.`);
+        return;
+    }
+
     const email = document.getElementById("loginEmail").value;
     const senha = document.getElementById("loginSenha").value;
 
@@ -305,6 +345,9 @@ document.getElementById("formLogin").addEventListener("submit", async function(e
             localStorage.setItem("logado", "true");
             localStorage.setItem("nomeUsuario", dados.user.nome);
             
+            localStorage.setItem("emailUsuario", dados.user.email);
+            localStorage.setItem("tipoUsuario", dados.user.tipo); 
+            
             alert(`Bem-vindo(a), ${dados.user.nome}!`);
             atualizarMenu();
             this.reset();
@@ -321,20 +364,59 @@ document.getElementById("formLogin").addEventListener("submit", async function(e
 // ===== ATUALIZA MENU =====
 function atualizarMenu() {
     const logado = localStorage.getItem("logado");
+    const nomeUsuario = localStorage.getItem("nomeUsuario");
+
+    const btnCadastro = document.getElementById("menuCadastro");
+    const btnLogin = document.getElementById("menuLogin");
+    const containerUsuario = document.getElementById("menuUsuario");
+    const spanNomeNav = document.getElementById("nomeUsuarioNav");
 
     if (logado === "true") {
-        document.getElementById("menuUsuario").style.display = "block";
+        if (btnCadastro) btnCadastro.style.display = "none";
+        if (btnLogin) btnLogin.style.display = "none";
+        
+        if (spanNomeNav) spanNomeNav.innerText = nomeUsuario;
+        if (containerUsuario) containerUsuario.style.display = "block";
     } else {
-        document.getElementById("menuUsuario").style.display = "none";
+        if (btnCadastro) btnCadastro.style.display = "block";
+        if (btnLogin) btnLogin.style.display = "block";
+        
+        if (containerUsuario) containerUsuario.style.display = "none";
     }
 }
+
+// ===== CONTROLE DO MENU DROPDOWN POR CLIQUE =====
+function toggleDropdown(evento) {
+    evento.preventDefault(); 
+    const dropdown = document.querySelector('.dropdown-content');
+    if (dropdown) {
+        dropdown.classList.toggle('show'); 
+    }
+}
+
+window.addEventListener('click', function(e) {
+    if (!e.target.matches('.usuario-link') && !e.target.matches('#nomeUsuarioNav')) {
+        const dropdown = document.querySelector('.dropdown-content');
+        if (dropdown && dropdown.classList.contains('show')) {
+            dropdown.classList.remove('show');
+        }
+    }
+});
 
 // ===== LOGOUT =====
 function logout() {
     localStorage.removeItem("logado");
     localStorage.removeItem("nomeUsuario");
+    
+    localStorage.removeItem("emailUsuario");
+    localStorage.removeItem("tipoUsuario"); 
+    
+    const dropdown = document.querySelector('.dropdown-content');
+    if (dropdown) dropdown.classList.remove('show');
+
     alert("Você saiu!");
     atualizarMenu();
+    showSection('home'); 
 }
 
 // ===== AO CARREGAR A PÁGINA =====
