@@ -70,8 +70,20 @@
         </section>
 
         <section id="painel-admin" style="display: none;">
-            <h2>Painel da Cozinha (Administrador)</h2>
+            <h2>Painel de Pedidos (Administrador)</h2>
             <div id="container-admin-pedidos"></div>
+        </section>
+
+        <section id="faturamento" style="display: none;">
+            <h2>Faturamento</h2>
+            <div class="faturamento-filtros">
+                <button class="filtro-btn active" onclick="carregarFaturamento('dia')">Dia</button>
+                <button class="filtro-btn" onclick="carregarFaturamento('semana')">Última Semana</button>
+                <button class="filtro-btn" onclick="carregarFaturamento('mes')">Último Mês</button>
+            </div>
+            <div id="box-faturamento-page" class="faturamento-resultado">
+                <p>Selecione um período para ver o faturamento.</p>
+            </div>
         </section>
 
         <section id="clientes" style="display:none;">

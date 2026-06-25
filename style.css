@@ -285,6 +285,64 @@ input:valid {
     border: 2px solid green;
 }
 
+/* ===== FATURAMENTO ===== */
+.faturamento-filtros {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 25px 0;
+    flex-wrap: wrap;
+}
+
+.filtro-btn {
+    padding: 10px 25px;
+    border-radius: 25px;
+    border: 2px solid #e67e22;
+    background-color: transparent;
+    color: #e67e22;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.filtro-btn:hover,
+.filtro-btn.active {
+    background-color: #e67e22;
+    color: white;
+}
+
+.faturamento-resultado {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.faturamento-card {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: white;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 6px 20px rgba(46, 204, 113, 0.35);
+}
+
+.faturamento-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    opacity: 0.9;
+}
+
+.faturamento-valor {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.faturamento-qtd {
+    font-size: 1rem;
+    opacity: 0.85;
+}
+
 footer {
     position: fixed;
     bottom: 0;

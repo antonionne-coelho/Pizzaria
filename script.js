@@ -288,25 +288,32 @@ function abrirPainelAdmin() {
 
 async function carregarPedidosAdmin() {
     const container = document.getElementById("container-admin-pedidos");
-    
-    // Área do Faturamento no Topo
-    container.innerHTML = `<div id="box-faturamento" style="background:#2ecc71; color:white; padding:15px; margin-bottom:20px; text-align:center; border-radius:8px;">Carregando faturamento...</div>
-                           <div id="lista-pedidos-admin" style="display:flex; flex-direction:column; gap:15px; align-items:center;"></div>`;
+    container.innerHTML = `<div id="lista-pedidos-admin" style="display:flex; flex-direction:column; gap:15px; align-items:center;"></div>`;
 
     try {
-        const resFaturamento = await fetch(`${API_URL}/pedidos/faturamento`);
-        const dadosFaturamento = await resFaturamento.json();
-        document.getElementById("box-faturamento").innerHTML = `<h3>Total Faturado: R$ ${dadosFaturamento.total}</h3>`;
-
         const resPedidos = await fetch(`${API_URL}/pedidos/todos`);
         const todosPedidos = await resPedidos.json();
-        
+
+        // Filtra: não mostra pedidos FINALIZADOS
+        const pedidosAtivos = todosPedidos.filter(p => p.status !== 'FINALIZADO');
+
         let html = "";
-        todosPedidos.forEach(pedido => {
+        if (pedidosAtivos.length === 0) {
+            html = "<p>Nenhum pedido ativo no momento.</p>";
+        }
+        pedidosAtivos.forEach(pedido => {
+            // Monta lista de itens para o admin
+            let itensHtml = '';
+            if (pedido.itens && pedido.itens.length > 0) {
+                itensHtml = `<div style="margin-top:8px;"><strong>Itens:</strong><ul style="text-align:left; margin:5px 0 0 20px;">${pedido.itens.map(i => `<li>${i.nome} - R$ ${i.preco ? i.preco.toFixed(2).replace('.', ',') : '0,00'}</li>`).join('')}</ul></div>`;
+            }
+            let dataFormatada = pedido.criadoEm ? new Date(pedido.criadoEm._seconds * 1000).toLocaleString('pt-BR') : '';
             html += `
                 <div style="background: #fff; border: 1px solid #ccc; padding: 15px; width: 100%; max-width: 500px; border-radius: 8px; text-align: left;">
                     <p><strong>Cliente:</strong> ${pedido.nome_cliente}</p>
-                    <p><strong>Total:</strong> R$ ${pedido.total.toFixed(2)}</p>
+                    ${dataFormatada ? `<p><strong>Data:</strong> ${dataFormatada}</p>` : ''}
+                    ${itensHtml}
+                    <p style="margin-top:8px;"><strong>Total:</strong> R$ ${pedido.total.toFixed(2).replace('.', ',')}</p>
                     <p><strong>Status:</strong> ${pedido.status}</p>
                     <div style="margin-top: 10px; display: flex; gap: 5px; flex-wrap: wrap;">
                         <button onclick="mudarStatus('${pedido.id}', 'SAIU PARA ENTREGA')" style="flex:1;">Saiu para Entrega</button>
@@ -328,6 +335,62 @@ async function mudarStatus(id, novoStatus) {
         });
         if (resposta.ok) { alert("Atualizado!"); carregarPedidosAdmin(); }
     } catch (e) { alert("Erro."); }
+}
+
+// ===== FATURAMENTO =====
+function abrirFaturamento() {
+    showSection('faturamento');
+}
+
+async function carregarFaturamento(periodo) {
+    // Atualiza botões ativos
+    document.querySelectorAll('.filtro-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+
+    const container = document.getElementById('box-faturamento-page');
+    container.innerHTML = '<p>Carregando...</p>';
+
+    try {
+        const resPedidos = await fetch(`${API_URL}/pedidos/todos`);
+        const todosPedidos = await resPedidos.json();
+
+        const agora = new Date();
+        let limiteMs;
+        let labelPeriodo;
+
+        if (periodo === 'dia') {
+            limiteMs = 24 * 60 * 60 * 1000; // 24 horas
+            labelPeriodo = 'Últimas 24 horas';
+        } else if (periodo === 'semana') {
+            limiteMs = 8 * 24 * 60 * 60 * 1000; // 8 dias
+            labelPeriodo = 'Últimos 8 dias';
+        } else {
+            limiteMs = 30 * 24 * 60 * 60 * 1000; // 30 dias
+            labelPeriodo = 'Últimos 30 dias';
+        }
+
+        const dataLimite = new Date(agora.getTime() - limiteMs);
+
+        const pedidosFiltrados = todosPedidos.filter(p => {
+            if (p.status !== 'FINALIZADO') return false;
+            if (!p.criadoEm || !p.criadoEm._seconds) return false;
+            const dataPedido = new Date(p.criadoEm._seconds * 1000);
+            return dataPedido >= dataLimite;
+        });
+
+        let totalFaturado = 0;
+        pedidosFiltrados.forEach(p => { totalFaturado += p.total; });
+
+        container.innerHTML = `
+            <div class="faturamento-card">
+                <h3>${labelPeriodo}</h3>
+                <p class="faturamento-valor">R$ ${totalFaturado.toFixed(2).replace('.', ',')}</p>
+                <p class="faturamento-qtd">${pedidosFiltrados.length} pedido(s) finalizado(s)</p>
+            </div>
+        `;
+    } catch (e) {
+        container.innerHTML = '<p>Erro ao carregar faturamento.</p>';
+    }
 }
 
 // ===== CADASTRO =====
@@ -364,8 +427,10 @@ function atualizarMenu() {
     const tipo = localStorage.getItem("tipoUsuario");
     const containerUsuario = document.getElementById("menuUsuario");
     const btnAdminExistente = document.getElementById("btnAdminNav");
+    const btnFaturamentoExistente = document.getElementById("btnFaturamentoNav");
     
     if (btnAdminExistente) btnAdminExistente.remove();
+    if (btnFaturamentoExistente) btnFaturamentoExistente.remove();
 
     if (logado === "true") {
         document.getElementById("menuCadastro").style.display = "none";
@@ -377,8 +442,13 @@ function atualizarMenu() {
         if (tipo === "admin") {
             const adminLi = document.createElement("li");
             adminLi.id = "btnAdminNav";
-            adminLi.innerHTML = `<a href="#" onclick="abrirPainelAdmin()" style="color: #ffcc00;">Painel Cozinha</a>`;
+            adminLi.innerHTML = `<a href="#" onclick="abrirPainelAdmin()" style="color: #ffcc00;">Painel Pedidos</a>`;
             document.querySelector(".nav-links").insertBefore(adminLi, containerUsuario);
+
+            const faturamentoLi = document.createElement("li");
+            faturamentoLi.id = "btnFaturamentoNav";
+            faturamentoLi.innerHTML = `<a href="#" onclick="abrirFaturamento()" style="color: #ffcc00;">Faturamento</a>`;
+            document.querySelector(".nav-links").insertBefore(faturamentoLi, containerUsuario);
         }
     } else {
         document.getElementById("menuCadastro").style.display = "block";
