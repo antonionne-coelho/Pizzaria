@@ -1,5 +1,5 @@
 // ===== CONFIGURAÇÃO DA API =====
-const API_URL = 'http://localhost:3000';
+const API_URL = 'https://tonnys-pizza-backend.onrender.com';
 
 // ===== LÓGICA DO CARRINHO DE COMPRAS =====
 let carrinho = [];
