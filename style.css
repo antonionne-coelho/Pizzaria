@@ -8,7 +8,7 @@
 header {
     background-color: #333;
     color: white;
-    padding: 0.5rem 0;
+    padding: 0.5rem 20px; /* Adicionado um padding lateral para telas menores */
     position: fixed;
     width: 100%;
     top: 0;
@@ -17,13 +17,13 @@ header {
 
 nav {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between; /* Distribui logo e botão na mesma linha */
     align-items: center;
     max-width: 1200px;
     margin: 0 auto;
+    width: 100%;
 }
 
-/* Ajuste da Logo com o Bonequinho */
 .logo {
     display: flex;
     align-items: center;
@@ -34,8 +34,16 @@ nav {
 }
 
 .logo-img {
-    height: 60px; /* Tamanho do bonequinho */
+    height: 60px;
     width: auto;
+}
+
+/* Oculta o ícone do hambúrguer no PC */
+.menu-toggle {
+    display: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: white;
 }
 
 .nav-links {
@@ -46,7 +54,7 @@ nav {
 
 .nav-links li {
     margin: 0 15px;
-    position: relative; /* Mantido para servir de âncora para a caixinha absoluta */
+    position: relative;
 }
 
 .nav-links a {
@@ -60,17 +68,16 @@ nav {
     color: #ffcc00;
 }
 
-/* ===== ESTILOS DO MENU DROPDOWN POR CLIQUE (100% SEGURO) ===== */
 .usuario-link {
-    color: #ffcc00 !important; /* Destaca o nome do usuário logado em dourado */
+    color: #ffcc00 !important;
     font-weight: bold;
     display: inline-block;
     cursor: pointer;
-    user-select: none; /* Impede que o texto fique selecionado em azul ao clicar rápido */
+    user-select: none;
 }
 
 .dropdown-content {
-    display: none; /* Começa rigorosamente escondido */
+    display: none;
     position: absolute;
     top: 100%;
     left: 50%;
@@ -81,7 +88,7 @@ nav {
     border-radius: 4px;
     list-style: none;
     padding: 0;
-    margin-top: 10px; /* Afastamento confortável sem risco de fechar sozinho */
+    margin-top: 10px;
     z-index: 1100;
 }
 
@@ -93,7 +100,7 @@ nav {
 
 .dropdown-content a {
     display: block;
-    padding: 12px 15px; /* Botão maior e mais fácil de clicar */
+    padding: 12px 15px;
     color: white;
     font-size: 0.95rem;
     text-decoration: none;
@@ -106,12 +113,10 @@ nav {
     color: white;
 }
 
-/* O JavaScript vai ativar essa classe ao identificar o clique do usuário */
 .dropdown-content.show {
     display: block;
 }
 
-/* Background da Home (Capa) */
 #home {
     height: 100vh;
     background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
@@ -127,7 +132,7 @@ nav {
 }
 
 section {
-    padding: 120px 20px;
+    padding: 120px 20px 80px 20px; /* Padding top de 120px afasta o conteúdo do Navbar em todas as telas */
     min-height: 100vh;
     text-align: center;
 }
@@ -145,6 +150,7 @@ section {
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 1rem;
+    width: 100%;
 }
 
 button {
@@ -167,6 +173,7 @@ button:hover {
     display: flex;
     justify-content: center;
     gap: 15px;
+    flex-wrap: wrap; /* Permite os botões quebrarem de linha se a tela for pequena */
 }
 
 .menu-categorias button {
@@ -183,7 +190,6 @@ button:hover {
     background-color: #d35400;
 }
 
-/* Fundo dinâmico do cardápio */
 .cardapio-bg {
     margin-top: 30px;
     min-height: 500px;
@@ -195,7 +201,6 @@ button:hover {
     transition: background-image 0.5s ease-in-out;
 }
 
-/* Conteúdo carregado com fundo branco opaco */
 .cardapio-content {
     background: rgba(255, 255, 255, 0.50); 
     border-radius: 10px;
@@ -203,7 +208,6 @@ button:hover {
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
-/* Configurações Globais dos Itens do Cardápio */
 .pizza-item, .pastel-item, .petisco-item, .bebida-item {
     display: flex;
     align-items: center;
@@ -215,7 +219,6 @@ button:hover {
     border-radius: 8px;
 }
 
-/* Imagens dos Produtos */
 .pizza-item img {
     width: 120px;
     height: 120px;
@@ -237,7 +240,6 @@ button:hover {
     border-radius: 10px;
 }
 
-/* Estruturas de Alinhamento Interno */
 .pizza-left, .pastel-info, .petisco-info, .bebida-info {
     display: flex;
     align-items: center;
@@ -250,7 +252,6 @@ button:hover {
     gap: 15px;
 }
 
-/* Fontes, Tamanhos e Negritos dos Produtos */
 .pizza-item h3, .pastel-item h3, .petisco-item h3, .bebida-item h3 {
     font-size: 1.5rem;
 }
@@ -260,7 +261,6 @@ button:hover {
     font-size: 1.1rem;
 }
 
-/* Galeria de Fotos */
 .galeria {
     margin-top: 30px;
     display: flex;
@@ -271,12 +271,12 @@ button:hover {
 
 .galeria img {
     width: 300px;
+    max-width: 100%;
     height: 200px;
     object-fit: cover;
     border-radius: 10px;
 }
 
-/* Validações Visuais de Input */
 input:invalid {
     border: 2px solid red;
 }
@@ -294,6 +294,7 @@ footer {
     text-align: center;
     padding: 10px;
     font-size: 0.9rem;
+    z-index: 1000;
 }
 
 #lista-carrinho {
@@ -302,4 +303,59 @@ footer {
     border-radius: 8px;
     max-width: 500px;
     margin: 0 auto;
+}
+
+.flex-column-center {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+}
+
+/* =========================================
+   REGRAS DE RESPONSIVIDADE (MOBILE)
+   ========================================= */
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: block; /* Mostra o hambúrguer */
+    }
+
+    .nav-links {
+        display: none; /* Esconde os links por padrão no mobile */
+        flex-direction: column;
+        position: absolute;
+        top: 76px; /* Altura do header */
+        left: 0;
+        width: 100%;
+        background-color: #333;
+        text-align: center;
+        padding: 20px 0;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    }
+
+    .nav-links.active {
+        display: flex; /* Exibe os links quando clica no menu */
+    }
+
+    .nav-links li {
+        margin: 15px 0;
+    }
+
+    /* Redefine os cards de produto para ficarem verticais (empilhados) */
+    .pizza-item, .pastel-item, .petisco-item, .bebida-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+        padding: 20px;
+    }
+
+    .pizza-left, .pastel-info, .petisco-info, .bebida-info {
+        flex-direction: column;
+        min-width: unset;
+    }
+
+    .pizza-precos {
+        flex-direction: column;
+        gap: 5px;
+    }
 }

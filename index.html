@@ -14,7 +14,10 @@
                 <img src="https://png.pngtree.com/png-vector/20250426/ourmid/pngtree-cartoon-chef-holding-pizza-with-happy-expression-clipart-illustration-png-image_16108826.png" alt="Logo Pizzaiolo" class="logo-img">
                 <span>Tonny's Pizza</span>
             </div>
-            <ul class="nav-links">
+            
+            <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+
+            <ul class="nav-links" id="navLinks">
                 <li><a href="#" onclick="showSection('home')">Home</a></li>
                 <li><a href="#" onclick="showSection('cardapio')">Cardápio</a></li>
                 <li><a href="#" onclick="showSection('carrinho')">Carrinho (<span id="contador-carrinho">0</span>)</a></li>
@@ -62,11 +65,11 @@
             <h2>Meus Pedidos</h2>
             <p style="margin-bottom: 20px;">Acompanhe o status das suas compras abaixo:</p>
 
-            <div id="container-meus-pedidos" style="display: flex; flex-direction: column; gap: 15px; align-items: center;">
+            <div id="container-meus-pedidos" class="flex-column-center">
             </div>
         </section>
 
-        <section id="painel-admin" style="display: none; padding: 20px;">
+        <section id="painel-admin" style="display: none;">
             <h2>Painel da Cozinha (Administrador)</h2>
             <div id="container-admin-pedidos"></div>
         </section>

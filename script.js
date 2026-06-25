@@ -10,10 +10,23 @@ function showSection(sectionId) {
     sections.forEach(sec => {
         sec.style.display = 'none';
     });
+    
     const target = document.getElementById(sectionId);
     if (target) {
         target.style.display = (sectionId === 'home') ? 'flex' : 'block';
     }
+
+    // Fecha o menu hamburguer automaticamente ao clicar em um link no mobile
+    const nav = document.getElementById("navLinks");
+    if (nav && nav.classList.contains("active")) {
+        nav.classList.remove("active");
+    }
+}
+
+// ===== MENU HAMBÚRGUER (MOBILE) =====
+function toggleMenu() {
+    const nav = document.getElementById("navLinks");
+    nav.classList.toggle("active");
 }
 
 function carregarCategoria(tipo) {
@@ -248,9 +261,12 @@ async function carregarMeusPedidos() {
         pedidos.forEach(pedido => {
             let dataFormatada = pedido.criadoEm ? new Date(pedido.criadoEm._seconds * 1000).toLocaleString('pt-BR') : "Data desconhecida";
             let itensHtml = `<ul>${pedido.itens.map(i => `<li>${i.nome}</li>`).join('')}</ul>`;
-            let botao = (pedido.status === "PREPARANDO") ? `<button onclick="cancelarPedido('${pedido.id}')">Cancelar Pedido</button>` : `<p>Status: ${pedido.status}</p>`;
+            let botao = (pedido.status === "PREPARANDO") ? `<button onclick="cancelarPedido('${pedido.id}')" style="background-color: #e74c3c; width: 100%; margin-top: 10px; border-radius: 4px;">Cancelar Pedido</button>` : `<p style="font-weight: bold; margin-top: 10px;">Status: ${pedido.status}</p>`;
             
-            html += `<div class="pedido-card"><h3>${dataFormatada}</h3>${itensHtml}<p>Total: R$ ${pedido.total.toFixed(2)}</p>${botao}</div>`;
+            html += `
+            <div style="background: rgba(255, 255, 255, 0.9); border-radius: 8px; padding: 20px; width: 100%; max-width: 500px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); color: #333;">
+                <h3>${dataFormatada}</h3>${itensHtml}<p>Total: R$ ${pedido.total.toFixed(2)}</p>${botao}
+            </div>`;
         });
         container.innerHTML = html || "<p>Nenhum pedido.</p>";
     } catch (e) { container.innerHTML = "<p>Erro.</p>"; }
@@ -264,7 +280,7 @@ async function cancelarPedido(idPedido) {
     } catch (e) { alert("Erro."); }
 }
 
-// ===== PAINEL DO ADMINISTRADOR (PASSO 9) =====
+// ===== PAINEL DO ADMINISTRADOR =====
 function abrirPainelAdmin() {
     showSection('painel-admin');
     carregarPedidosAdmin();
@@ -272,23 +288,35 @@ function abrirPainelAdmin() {
 
 async function carregarPedidosAdmin() {
     const container = document.getElementById("container-admin-pedidos");
-    container.innerHTML = "<p>Carregando...</p>";
+    
+    // Área do Faturamento no Topo
+    container.innerHTML = `<div id="box-faturamento" style="background:#2ecc71; color:white; padding:15px; margin-bottom:20px; text-align:center; border-radius:8px;">Carregando faturamento...</div>
+                           <div id="lista-pedidos-admin" style="display:flex; flex-direction:column; gap:15px; align-items:center;"></div>`;
+
     try {
-        const resposta = await fetch(`${API_URL}/pedidos/todos`);
-        const todosPedidos = await resposta.json();
+        const resFaturamento = await fetch(`${API_URL}/pedidos/faturamento`);
+        const dadosFaturamento = await resFaturamento.json();
+        document.getElementById("box-faturamento").innerHTML = `<h3>Total Faturado: R$ ${dadosFaturamento.total}</h3>`;
+
+        const resPedidos = await fetch(`${API_URL}/pedidos/todos`);
+        const todosPedidos = await resPedidos.json();
+        
         let html = "";
         todosPedidos.forEach(pedido => {
             html += `
-                <div style="background: #fff; border: 1px solid #ccc; padding: 15px; margin: 10px auto; max-width: 500px; border-radius: 8px;">
+                <div style="background: #fff; border: 1px solid #ccc; padding: 15px; width: 100%; max-width: 500px; border-radius: 8px; text-align: left;">
                     <p><strong>Cliente:</strong> ${pedido.nome_cliente}</p>
+                    <p><strong>Total:</strong> R$ ${pedido.total.toFixed(2)}</p>
                     <p><strong>Status:</strong> ${pedido.status}</p>
-                    <button onclick="mudarStatus('${pedido.id}', 'SAIU PARA ENTREGA')">Saiu para Entrega</button>
-                    <button onclick="mudarStatus('${pedido.id}', 'FINALIZADO')" style="background-color: #2ecc71;">Finalizar</button>
+                    <div style="margin-top: 10px; display: flex; gap: 5px; flex-wrap: wrap;">
+                        <button onclick="mudarStatus('${pedido.id}', 'SAIU PARA ENTREGA')" style="flex:1;">Saiu para Entrega</button>
+                        <button onclick="mudarStatus('${pedido.id}', 'FINALIZADO')" style="background-color: #2ecc71; flex:1;">Finalizar</button>
+                    </div>
                 </div>
             `;
         });
-        container.innerHTML = html;
-    } catch (e) { container.innerHTML = "<p>Erro ao carregar.</p>"; }
+        document.getElementById("lista-pedidos-admin").innerHTML = html;
+    } catch (e) { container.innerHTML = "<p>Erro ao carregar painel.</p>"; }
 }
 
 async function mudarStatus(id, novoStatus) {
@@ -361,7 +389,11 @@ function atualizarMenu() {
 }
 
 // ===== UTILITÁRIOS =====
-function toggleDropdown(e) { e.preventDefault(); document.querySelector('.dropdown-content').classList.toggle('show'); }
+function toggleDropdown(e) { 
+    e.preventDefault(); 
+    document.querySelector('.dropdown-content').classList.toggle('show'); 
+}
+
 function logout() {
     localStorage.clear();
     carrinho = [];
@@ -370,4 +402,8 @@ function logout() {
     showSection('home');
     alert("Você saiu!");
 }
-window.onload = () => { atualizarMenu(); atualizarInterfaceCarrinho(); };
+
+window.onload = () => { 
+    atualizarMenu(); 
+    atualizarInterfaceCarrinho(); 
+};
