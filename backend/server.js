@@ -1,8 +1,18 @@
 import express from "express";
 import cors from "cors";
+
 import { initializeApp, cert } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
-import serviceAccount from "./firebase-key.json" with { type: "json" };
+import fs from "fs";
+
+let serviceAccount;
+
+// Se existir a variável de ambiente no Render, usa ela. Se não, lê o arquivo local (PC)
+if (process.env.FIREBASE_CONFIG) {
+    serviceAccount = JSON.parse(process.env.FIREBASE_CONFIG);
+} else {
+    serviceAccount = JSON.parse(fs.readFileSync("./firebase-key.json", "utf8"));
+}
 
 console.log("Projeto:", serviceAccount.project_id);
 console.log("Email:", serviceAccount.client_email);
